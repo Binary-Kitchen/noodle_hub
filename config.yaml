@@ -1,0 +1,25 @@
+title: Noodle Hub
+lights-gpio: 2
+mqtt-host: pizza.binary.kitchen 
+mqtt-port: 1883
+mqtt-prefix: kitchen/cellar/3dprinter/
+standby-timeout: 1800
+printers:
+  - name: Creality CR-10
+    code-name: Spaghetti
+    url: https://spaghetti.binary.kitchen
+    stream-url: https://spaghetti.binary.kitchen/webcam
+    power-gpio: 1
+    raspi-gpio: 3
+    mqtt-name: cr10
+    mqtt-connected-topic: cr10/mqtt
+    mqtt-print-progress-topic: cr10/progress/printing
+  - name: Wanhao Duplicator i3
+    code-name: Maccaroni
+    url: https://maccaroni.binary.kitchen
+    stream-url: https://maccaroni.binary.kitchen/webcam
+    power-gpio: 2
+    raspi-gpio: 4
+    mqtt-name: wanhao
+    mqtt-connected-topic: wanhao/mqtt
+    mqtt-print-progress-topic: wanhao/progress/printing
