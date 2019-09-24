@@ -118,8 +118,9 @@ def gpio_cmd(gpio, state):
         try:
                 line = chip.get_line(int(gpio))
                 line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
-                line.set_value(state)
+                line.set_value(int(not state))
                 line.release()
+                log.debug("gpio pin {} set to {}".format(int(gpio), int(state)))
         except OSError as e:
                 log.error(e)
 
@@ -174,15 +175,15 @@ def mqtt_on_print_progress(client, userdata, msg, printer):
 
 
 def mqtt_on_lights_cmd(client, userdata, msg):
-        state = bool(msg.payload)
+        state = int(msg.payload)
         lights_cmd(state)
 
 def mqtt_on_rpi_cmd(client, userdata, msg, printer):
-        state = bool(msg.payload)
+        state = int(msg.payload)
         printer_change_state(state,printer)
 
 def mqtt_on_power_cmd(client, userdata, msg, printer):
-        state = bool(msg.payload)
+        state = int(msg.payload)
         printer_change_state(state,printer)
 
 @app.route('/',methods=['GET', 'POST'])
@@ -193,7 +194,7 @@ def web_main():
                 printer_config = get_printer_from_config(config, printer)
                 cmd = request.form.get('cmd')
                 if cmd == "lights":
-                        value = bool(request.form.get('value'))
+                        value = False if request.form.get('value')=="0" else True
                         log.info("change light state to {}".format(value))
                         lights_cmd(value)
                 else:
