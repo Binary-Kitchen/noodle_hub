@@ -49,6 +49,10 @@ printer_idle_status = dict()
 standby_timers = dict()
 light_state = False
 
+
+chip = gpiod.Chip("gpiochip0")
+lines = dict()
+
 client = mqtt.Client()
 
 prog = sys.argv[0]
@@ -56,6 +60,18 @@ prog = sys.argv[0]
 def read_config(): 
     with open('config.yaml') as f:
         return yaml.load(f,yaml.FullLoader)
+
+def init_line(number):
+        line = chip.get_line(number)
+        line.request(consumer=prog,type = gpiod.LINE_REQ_DIR_OUT)
+        return line
+
+def init_gpios():
+        lines["lights"] = init_line(config['lights-gpio'])
+        for printer in config['printers']:
+                printer_name = printer['name']
+                lines['{}_{}'.format(printer_name,"rpi")] = init_line(printer["raspi-gpio"])
+                lines['{}_{}'.format(printer_name,"pwr")] = init_line(printer["power-gpio"])
 
 def get_printer_from_config(config,printer_name):
         for p in config['printers']:
@@ -113,25 +129,14 @@ class printer_state_change_response:
                 self.success = success
                 self.msg = msg
 
-def gpio_cmd(gpio, state):
-        try:
-                chip = gpiod.Chip("gpiochip0")
-                line = chip.get_line(int(gpio))
-                line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
-                line.set_value(int(not state))
-                line.release()
-                chip.close()
-                log.debug("gpio pin {} set to {}".format(int(gpio), int(state)))
-        except OSError as e:
-                log.error(e)
-
-
 def printer_change_state(state,printer):
+        name = printer['name']
         log.info("change state of {} to {}".format(printer['name'],state))
         if not state and not printer_idle_status[printer['name']]:
                 return printer_state_change_response(False, "can not shutdown printer while it is printing")
-        gpio_cmd(printer['raspi-gpio'], state)
-        gpio_cmd(printer['power-gpio'], state)
+
+        lines["{}_rpi".format(name)].set_value(state)
+        lines["{}_pwr".format(name)].set_value(state)
 
         prefix = config['mqtt-prefix']
         mqtt_name = printer['mqtt-name']
@@ -141,7 +146,7 @@ def printer_change_state(state,printer):
         return printer_state_change_response(True)
         
 def lights_cmd(state):
-        gpio_cmd(config['lights-gpio'],state)
+        lines["lights"].set_value(state)
         prefix = config['mqtt-prefix']
         client.publish(prefix + 'lights/state',str(int(state)))
 
@@ -222,7 +227,7 @@ if __name__ == "__main__":
         config = read_config()
         logging.basicConfig(level=log_level, stream=sys.stdout,
                         format=log_fmt, datefmt=date_fmt)
-        #gpio_setup()
+        init_gpios()
         client = mqtt.Client()
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
         threading.Thread(target=mqtt_worker).start()
