@@ -116,15 +116,15 @@ class printer_state_change_response:
 
 def gpio_cmd(gpio, state):
         try:
-                line = chip.get_line(gpio)
+                line = chip.get_line(int(gpio))
         except OSError as e:
-                log.error("Can not find gpio line {}".format(gpio))
-                sys.exit(-1)
+                log.error(e)
 
         if line.direction() is not gpiod.Line.DIRECTION_OUTPUT:
                 line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
-                
+
         line.set_value(state)
+        line.release()
 
 
 def printer_change_state(state,printer):
