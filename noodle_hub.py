@@ -223,4 +223,4 @@ if __name__ == "__main__":
         client = mqtt.Client()
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
         threading.Thread(target=mqtt_worker).start()
-        app.run()
+        app.run(host="0.0.0.0",debug=True)
