@@ -50,7 +50,6 @@ standby_timers = dict()
 light_state = False
 
 client = mqtt.Client()
-chip = gpiod.Chip("gpiochip0")
 
 prog = sys.argv[0]
 
@@ -116,10 +115,12 @@ class printer_state_change_response:
 
 def gpio_cmd(gpio, state):
         try:
+                chip = gpiod.Chip("gpiochip0")
                 line = chip.get_line(int(gpio))
                 line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
                 line.set_value(int(not state))
                 line.release()
+                chip.close()
                 log.debug("gpio pin {} set to {}".format(int(gpio), int(state)))
         except OSError as e:
                 log.error(e)
@@ -151,7 +152,8 @@ def mqtt_on_connected(client, userdata, msg, printer):
         
         # if all printers are offline, turn of lights
         if all(v == False for v in printer_connection_status.values()):
-                lights_cmd(False)
+                pass
+                #lights_cmd(False)
         else:
                 lights_cmd(True)
 
