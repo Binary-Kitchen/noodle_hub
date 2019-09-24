@@ -117,14 +117,11 @@ class printer_state_change_response:
 def gpio_cmd(gpio, state):
         try:
                 line = chip.get_line(int(gpio))
+                line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
+                line.set_value(state)
+                line.release()
         except OSError as e:
                 log.error(e)
-
-        if line.direction() is not gpiod.Line.DIRECTION_OUTPUT:
-                line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
-
-        line.set_value(state)
-        line.release()
 
 
 def printer_change_state(state,printer):
@@ -196,8 +193,9 @@ def web_main():
                 printer_config = get_printer_from_config(config, printer)
                 cmd = request.form.get('cmd')
                 if cmd == "lights":
-                        value = request.form.get('value')
-                        lights_cmd(bool(value))
+                        value = bool(request.form.get('value'))
+                        log.info("change light state to {}".format(value))
+                        lights_cmd(value)
                 else:
                         if cmd == 'power_off':
                                 desired_state = False
