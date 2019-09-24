@@ -47,6 +47,7 @@ log = logging.getLogger()
 printer_connection_status = dict()
 printer_idle_status = dict()
 standby_timers = dict()
+light_state = False
 
 client = mqtt.Client()
 chip = gpiod.Chip("gpiochip0")
@@ -194,20 +195,22 @@ def web_main():
                 printer = request.form.get('printer')
                 printer_config = get_printer_from_config(config, printer)
                 cmd = request.form.get('cmd')
-
-                if cmd == 'power_off':
-                        desired_state = False
-                        log.info("Received shutdown  command  for printer {}".format(printer))
-                elif cmd == 'power_on':
-                        desired_state = True
-                        log.info("Received power on command for printer {}".format(printer))
+                if cmd == "lights":
+                        value = request.form.get('value')
+                        lights_cmd(bool(value))
                 else:
-                        abort(400)
+                        if cmd == 'power_off':
+                                desired_state = False
+                                log.info("Received shutdown  command  for printer {}".format(printer))
+                        elif cmd == 'power_on':
+                                desired_state = True
+                                log.info("Received power on command for printer {}".format(printer))
+                        else:
+                                abort(400)
+                        res = printer_change_state(desired_state, printer_config)
 
-                res = printer_change_state(desired_state, printer_config) 
-                
-                
-        return render_template("index.html", printers=config['printers'], 
+        return render_template("index.html", printers=config['printers'],
+                                             light_state=light_state,
                                              info=info, 
                                              online_status=printer_connection_status,
                                              result = res)
