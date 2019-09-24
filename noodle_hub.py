@@ -27,7 +27,7 @@ import paho.mqtt.client as mqtt
 import threading
 import json
 
-from periphery import GPIO
+import gpiod
 from flask import Flask, render_template, request, redirect, abort
 
 info = dict()
@@ -49,6 +49,9 @@ printer_idle_status = dict()
 standby_timers = dict()
 
 client = mqtt.Client()
+chip = gpiod.Chip("gpiochip0")
+
+prog = sys.argv[0]
 
 def read_config(): 
     with open('config.yaml') as f:
@@ -110,8 +113,18 @@ class printer_state_change_response:
                 self.success = success
                 self.msg = msg
 
-def gpio_cmd(gpios, state):
-        pass
+def gpio_cmd(gpio, state):
+        try:
+                line = chip.get_line(gpio)
+        except OSError as e:
+                log.error("Can not find gpio line {}".format(gpio))
+                sys.exit(-1)
+
+        if line.direction() is not gpiod.Line.DIRECTION_OUTPUT:
+                line.request(consumer=prog,type=gpiod.LINE_REQ_DIR_OUT)
+                
+        line.set_value(state)
+
 
 def printer_change_state(state,printer):
         log.info("change state of {} to {}".format(printer['name'],state))
