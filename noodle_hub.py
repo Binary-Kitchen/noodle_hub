@@ -152,9 +152,11 @@ def printer_change_state(state,printer):
         if not state and not printer_idle_status[printer['name']]:
                 return printer_state_change_response(False, "can not shutdown printer while it is printing")
 
-        lines["{}_rpi".format(name)].set_value(state)
-        lines["{}_pwr".format(name)].set_value(state)
+        lines["{}_rpi".format(name)].set_value(not state)
+        lines["{}_pwr".format(name)].set_value(not state)
 
+        printer_gpio_status["{}_rpi".format(name)] = state
+        printer_gpio_status["{}_pwr".format(name)] = state
 
         prefix = config['mqtt-prefix']
         mqtt_name = printer['mqtt-name']
@@ -245,7 +247,7 @@ def web_main():
                 else:
                         if cmd == 'power_off':
                                 desired_state = False
-                                log.info("Received shutdown  command  for printer {}".format(printer))
+                                log.info("Received shutdown command  for printer {}".format(printer))
                         elif cmd == 'power_on':
                                 desired_state = True
                                 log.info("Received power on command for printer {}".format(printer))
