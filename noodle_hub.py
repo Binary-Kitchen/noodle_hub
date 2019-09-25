@@ -243,8 +243,14 @@ if __name__ == "__main__":
         config = read_config()
         logging.basicConfig(level=log_level, stream=sys.stdout,
                         format=log_fmt, datefmt=date_fmt)
+
         init_gpios()
+
         client = mqtt.Client()
+        with open("credentials.yaml") as f:
+            mqtt_auth = yaml.load(f,yaml.FullLoader)
+        client.username_pw_set(mqtt_auth["username"], mqtt_auth["password"])
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
+
         threading.Thread(target=mqtt_worker).start()
         app.run(host="0.0.0.0",debug=True, use_reloader=False)
