@@ -255,8 +255,10 @@ def web_main():
 
         return render_template("index.html", printers=config['printers'],
                                              light_state=get_light_state(),
-                                             info=info, 
+                                             info=info,
+                                             gpio_status=printer_gpio_status,
                                              online_status=printer_connection_status,
+                                             idle_status=printer_idle_status,
                                              result = res)
 
 

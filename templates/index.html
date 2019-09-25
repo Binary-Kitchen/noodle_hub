@@ -53,7 +53,7 @@
                           <div class="card-body">
                             <h5 class="card-title">{{ p["name"] }}</h5>
                             <p class="text-muted">Code name: {{ p["code-name"] }}</p>
-                            <p class="text-muted">Status: {% if online_status[p["name"]] %} Online {% else %} Offline {% endif %}</p>
+                            <p class="text-muted">Octoprint status: {% if online_status[p["name"]] %} Online {% else %} Offline {% endif %}</p>
                             {% if res and not result.success %}
                             <div class="alert alert-danger" role="alert">
                                 <strong>Print in progress!</strong> You can not turn off the printer while it's printing.
@@ -66,7 +66,7 @@
                                 <a href="{{ p["url"] }}">
                                   <button type="button" class="btn btn-secondary">View</button>
                                 </a>
-                                {% if online_status[p["name"]] %}
+                                {% if gpio_status[p["name"]+"_rpi"] %}
                                   <input type="hidden" name="cmd" value="power_off" />
                                   <button type="submit" class="btn btn-secondary">Power off</button>
                                 {% else %}
