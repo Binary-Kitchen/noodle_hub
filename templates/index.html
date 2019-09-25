@@ -54,7 +54,8 @@
                             <h5 class="card-title">{{ p["name"] }}</h5>
                             <p class="text-muted">Code name: {{ p["code-name"] }}</p>
                             <p class="text-muted">Octoprint status: {% if online_status[p["name"]] %} Online {% else %} Offline {% endif %}</p>
-                            {% if res and not result.success %}
+			    <p class="text-muted">Idle: {% if idle_status[p["name"]] %} True {% else %} False {% endif %}</p>
+			    {% if res and not result.success %}
                             <div class="alert alert-danger" role="alert">
                                 <strong>Print in progress!</strong> You can not turn off the printer while it's printing.
                             </div>
