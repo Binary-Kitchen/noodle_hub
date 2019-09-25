@@ -191,7 +191,7 @@ def mqtt_on_print_progress(client, userdata, msg, printer):
         data = json.loads(msg.payload)
         flags = data["printer_data"]["state"]["flags"]
         if not flags["operational"] or flags["finishing"]:
-                printer_idle_status[printer_name] = True
+                printer_idle_status[printer_name] = False
                 standby_timeout = config["standby-timeout"]
                 if printer_name in standby_timers:
                         standby_timers[printer_name].cancel()
@@ -199,7 +199,7 @@ def mqtt_on_print_progress(client, userdata, msg, printer):
                 standby_timers[printer_name] = timer
                 timer.start()
         else:
-                printer_idle_status[printer_name] = False
+                printer_idle_status[printer_name] = True
                 if printer_name in standby_timers:
                         standby_timers[printer_name].cancel()
 
