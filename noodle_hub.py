@@ -227,6 +227,7 @@ def mqtt_parse_boolean(msg):
                 ))
                 return None
         return state
+
 @app.route('/',methods=['GET', 'POST'])
 def web_main():
         res = None
@@ -235,7 +236,7 @@ def web_main():
                 printer_config = get_printer_from_config(config, printer)
                 cmd = request.form.get('cmd')
                 if cmd == "lights":
-                        value = not lines["lights"].get_value()
+                        value = lines["lights"].get_value()
                         log.info("change light state to {}".format(value))
                         lights_cmd(value)
                 else:
