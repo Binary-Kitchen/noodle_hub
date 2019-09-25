@@ -161,7 +161,7 @@ def printer_change_state(state,printer):
         return printer_state_change_response(True)
         
 def lights_cmd(state):
-        lines["lights"].set_value(state)
+        lines["lights"].set_value(not state)
         prefix = config['mqtt-prefix']
         client.publish(prefix + 'lights/state',str(int(state)))
 
@@ -219,9 +219,9 @@ def web_main():
                 printer_config = get_printer_from_config(config, printer)
                 cmd = request.form.get('cmd')
                 if cmd == "lights":
-                        value = False if request.form.get('value')=="0" else True
+                        value = not lines["lights"].get_value()
                         log.info("change light state to {}".format(value))
-                        lights_cmd(not lines["lights"].get_value())
+                        lights_cmd(value)
                 else:
                         if cmd == 'power_off':
                                 desired_state = False
