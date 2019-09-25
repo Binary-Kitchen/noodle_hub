@@ -200,17 +200,33 @@ def mqtt_on_print_progress(client, userdata, msg, printer):
 
 
 def mqtt_on_lights_cmd(client, userdata, msg):
-        state = int(msg.payload)
-        lights_cmd(state)
+        state = mqtt_parse_boolean(msg)
+        if state is not None:
+                log.info("mqtt change lights to {}".format(state))
+                lights_cmd(state)
 
 def mqtt_on_rpi_cmd(client, userdata, msg, printer):
-        state = int(msg.payload)
-        printer_change_state(state,printer)
+        state = mqtt_parse_boolean(msg)
+        if state is not None:
+                printer_change_state(state,printer)
 
 def mqtt_on_power_cmd(client, userdata, msg, printer):
-        state = int(msg.payload)
-        printer_change_state(state,printer)
+        state = mqtt_parse_boolean(msg)
+        if state is not None:
+                printer_change_state(state,printer)
 
+def mqtt_parse_boolean(msg):
+        if msg.payload.decode() == "0":
+                state = False
+        elif msg.payload.decode() == "1":
+                state = True
+        else:
+                log.info("received mqtt topic ""{}"" with invalid payload: {}".format(
+                        msg.topic,
+                        msg.payload
+                ))
+                return None
+        return state
 @app.route('/',methods=['GET', 'POST'])
 def web_main():
         res = None
