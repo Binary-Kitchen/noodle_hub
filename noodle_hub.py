@@ -66,12 +66,23 @@ def init_line(number):
         line.request(consumer=prog,type = gpiod.LINE_REQ_DIR_OUT)
         return line
 
+def is_line_initialized(line):
+    if line.is_requested() and line.direction() == gpiod.Line.DIRECTION_OUTPUT:
+        return True
+    return False
+
 def init_gpios():
-        lines["lights"] = init_line(config['lights-gpio'])
+        if lines.get('lights') is None or is_line_initialized(lines["lights"]):
+            lines["lights"] = init_line(config['lights-gpio'])
         for printer in config['printers']:
                 printer_name = printer['name']
-                lines['{}_{}'.format(printer_name,"rpi")] = init_line(printer["raspi-gpio"])
-                lines['{}_{}'.format(printer_name,"pwr")] = init_line(printer["power-gpio"])
+                rpi_name = '{}_{}'.format(printer_name,'rpi')
+                pwr_name = '{}_{}'.format(printer_name,'pwr')
+                if lines.get(rpi_name) is None or is_line_initialized(lines[rpi_name]):
+                    lines['{}_{}'.format(printer_name,"rpi")] = init_line(printer["raspi-gpio"])
+                if lines.get(pwr_name) is None or is_line_initialized(lines[pwr_name]):
+                    lines['{}_{}'.format(printer_name,"pwr")] = init_line(printer["power-gpio"])
+        log.info(lines)
 
 def get_printer_from_config(config,printer_name):
         for p in config['printers']:
@@ -231,4 +242,4 @@ if __name__ == "__main__":
         client = mqtt.Client()
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
         threading.Thread(target=mqtt_worker).start()
-        app.run(host="0.0.0.0",debug=True)
+        app.run(host="0.0.0.0",debug=True, use_reloader=False)
