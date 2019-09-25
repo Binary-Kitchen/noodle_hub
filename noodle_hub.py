@@ -47,7 +47,6 @@ log = logging.getLogger()
 printer_connection_status = dict()
 printer_idle_status = dict()
 standby_timers = dict()
-light_state = False
 
 
 chip = gpiod.Chip("gpiochip0")
@@ -135,6 +134,8 @@ def mqtt_worker():
 
         client.loop_forever()
 
+
+
 class printer_state_change_response:
         def __init__(self, success, msg=''):
                 self.success = success
@@ -149,6 +150,7 @@ def printer_change_state(state,printer):
         lines["{}_rpi".format(name)].set_value(state)
         lines["{}_pwr".format(name)].set_value(state)
 
+
         prefix = config['mqtt-prefix']
         mqtt_name = printer['mqtt-name']
         client.publish(prefix + mqtt_name + '/power/state', state)
@@ -160,6 +162,9 @@ def lights_cmd(state):
         lines["lights"].set_value(state)
         prefix = config['mqtt-prefix']
         client.publish(prefix + 'lights/state',str(int(state)))
+
+def get_light_state():
+        return lines["lights"].get_value()
 
 def mqtt_on_connected(client, userdata, msg, printer):
         log.info("Received connection message for printer {}: {}".format(printer['name'], msg.payload))
@@ -227,7 +232,7 @@ def web_main():
                         res = printer_change_state(desired_state, printer_config)
 
         return render_template("index.html", printers=config['printers'],
-                                             light_state=light_state,
+                                             light_state=get_light_state(),
                                              info=info, 
                                              online_status=printer_connection_status,
                                              result = res)
@@ -239,8 +244,6 @@ if __name__ == "__main__":
         logging.basicConfig(level=log_level, stream=sys.stdout,
                         format=log_fmt, datefmt=date_fmt)
         init_gpios()
-        print(lines["lights"].get_value())
-        light_state = lines["lights"].get_value()
         client = mqtt.Client()
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
         threading.Thread(target=mqtt_worker).start()
