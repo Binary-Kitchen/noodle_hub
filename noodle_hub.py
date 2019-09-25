@@ -94,6 +94,8 @@ def mqtt_worker():
         lights_topic = prefix + "lights/cmd"
         client.subscribe(lights_topic,0)
         client.message_callback_add(lights_topic, mqtt_on_lights_cmd)
+        log.debug("Lights state topic: {}".format(prefix + "lights/state"))
+        log.debug("Lights cmd topic: {}".format(lights_topic))
 
         for printer in config['printers']:
                 printer_name = printer['name']
@@ -219,7 +221,7 @@ def web_main():
                 if cmd == "lights":
                         value = False if request.form.get('value')=="0" else True
                         log.info("change light state to {}".format(value))
-                        lights_cmd(value)
+                        lights_cmd(not lines["lights"].get_value())
                 else:
                         if cmd == 'power_off':
                                 desired_state = False
