@@ -46,6 +46,7 @@ log = logging.getLogger()
 
 printer_connection_status = dict()
 printer_idle_status = dict()
+printer_gpio_status = dict()
 standby_timers = dict()
 
 
@@ -81,6 +82,8 @@ def init_gpios():
                     lines['{}_{}'.format(printer_name,"rpi")] = init_line(printer["raspi-gpio"])
                 if lines.get(pwr_name) is None or is_line_initialized(lines[pwr_name]):
                     lines['{}_{}'.format(printer_name,"pwr")] = init_line(printer["power-gpio"])
+                printer_gpio_status[rpi_name] = not lines[rpi_name].get_value()
+                printer_gpio_status[pwr_name] = not lines[pwr_name].get_value()
         log.info(lines)
 
 def get_printer_from_config(config,printer_name):
@@ -264,6 +267,12 @@ if __name__ == "__main__":
                         format=log_fmt, datefmt=date_fmt)
 
         init_gpios()
+
+
+        #init printer idle and connection status
+        for printer in config["printers"]:
+                printer_idle_status[printer["name"]] = True
+                printer_connection_status[printer["name"]] = False
 
         client = mqtt.Client()
         with open("credentials.yaml") as f:
