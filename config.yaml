@@ -1,5 +1,6 @@
 title: Noodle Hub
 lights-gpio: 23
+default-lights-state: false
 mqtt-host: pizza.binary.kitchen 
 mqtt-port: 1883
 mqtt-prefix: kitchen/cellar/3dprinter/
@@ -9,6 +10,7 @@ printers:
     code-name: Spaghetti
     url: https://spaghetti.binary.kitchen
     stream-url: https://spaghetti.binary.kitchen/webcam
+    default-power-state: false
     power-gpio: 25
     raspi-gpio: 14
     mqtt-name: cr10
@@ -18,6 +20,7 @@ printers:
     code-name: Maccaroni
     url: https://maccaroni.binary.kitchen
     stream-url: https://maccaroni.binary.kitchen/webcam
+    default-power-state: false
     power-gpio: 8
     raspi-gpio: 15
     mqtt-name: wanhao

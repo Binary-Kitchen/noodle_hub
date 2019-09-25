@@ -74,17 +74,31 @@ def is_line_initialized(line):
 def init_gpios():
         if lines.get('lights') is None or is_line_initialized(lines["lights"]):
             lines["lights"] = init_line(config['lights-gpio'])
+
+        default_state = config.get("default-light-state")
+        if default_state is not None:
+            lines["lights"].set_value(not default_state)
+        else:
+            lines["lights"].set_value(1)
+
         for printer in config['printers']:
                 printer_name = printer['name']
                 rpi_name = '{}_{}'.format(printer_name,'rpi')
                 pwr_name = '{}_{}'.format(printer_name,'pwr')
                 if lines.get(rpi_name) is None or is_line_initialized(lines[rpi_name]):
-                    lines['{}_{}'.format(printer_name,"rpi")] = init_line(printer["raspi-gpio"])
+                    lines[rpi_name] = init_line(printer["raspi-gpio"])
                 if lines.get(pwr_name) is None or is_line_initialized(lines[pwr_name]):
-                    lines['{}_{}'.format(printer_name,"pwr")] = init_line(printer["power-gpio"])
+                    lines[pwr_name] = init_line(printer["power-gpio"])
+
+                default_state = printer.get("default-power-state")
+                if default_state is not None:
+                    lines[rpi_name].set_value(not default_state)
+                    lines[pwr_name].set_value(not default_state)
+
                 printer_gpio_status[rpi_name] = not lines[rpi_name].get_value()
                 printer_gpio_status[pwr_name] = not lines[pwr_name].get_value()
         log.info(lines)
+
 
 def get_printer_from_config(config,printer_name):
         for p in config['printers']:
