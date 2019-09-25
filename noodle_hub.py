@@ -239,6 +239,8 @@ if __name__ == "__main__":
         logging.basicConfig(level=log_level, stream=sys.stdout,
                         format=log_fmt, datefmt=date_fmt)
         init_gpios()
+        print(lines["lights"].get_value())
+        light_state = lines["lights"].get_value()
         client = mqtt.Client()
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
         threading.Thread(target=mqtt_worker).start()
