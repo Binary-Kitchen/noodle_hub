@@ -163,7 +163,7 @@ class printer_state_change_response:
 def printer_change_state(state,printer):
         name = printer['name']
         log.info("change state of {} to {}".format(printer['name'],state))
-        if not state and  printer_idle_status[printer['name']]:
+        if not state and not printer_idle_status[printer['name']]:
                 return printer_state_change_response(False, "can not shutdown printer while it is printing")
 
         lines["{}_rpi".format(name)].set_value(not state)
@@ -171,6 +171,8 @@ def printer_change_state(state,printer):
 
         printer_gpio_status["{}_rpi".format(name)] = state
         printer_gpio_status["{}_pwr".format(name)] = state
+
+        log.info(printer_gpio_status)
 
         prefix = config['mqtt-prefix']
         mqtt_name = printer['mqtt-name']
@@ -203,18 +205,18 @@ def mqtt_on_printer_state_changed(client, userdata, msg, printer):
         log.info("Received print state change message for printer {}: {}".format(printer['name'], msg.payload))
         printer_name = printer["name"]
         data = json.loads(msg.payload)
-        flags = data["printer_data"]["state"]["flags"]
         state = data['state_id']
-        if state is not "OPERATIONAL":
-                printer_idle_status[printer_name] = False
+        if state == "OPERATIONAL" or state == "ERROR" and printer_connection_status[printer_name]:
+                printer_idle_status[printer_name] = True
                 standby_timeout = config["standby-timeout"]
                 if printer_name in standby_timers:
                         standby_timers[printer_name].cancel()
                 timer = threading.Timer(standby_timeout, lambda: printer_change_state(False,printer))
                 standby_timers[printer_name] = timer
                 timer.start()
+
         else:
-                printer_idle_status[printer_name] = True
+                printer_idle_status[printer_name] = False
                 if printer_name in standby_timers:
                         standby_timers[printer_name].cancel()
 
@@ -269,7 +271,7 @@ def web_main():
                         else:
                                 abort(400)
                         res = printer_change_state(desired_state, printer_config)
-
+                        log.info(res)
         return render_template("index.html", printers=config['printers'],
                                              light_state=get_light_state(),
                                              info=info,
