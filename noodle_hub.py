@@ -124,26 +124,26 @@ def mqtt_worker():
                         prefix = config['mqtt-prefix']
 
                 connected_topic = prefix+printer['mqtt-connected-topic']
-                print_progress_topic = prefix+printer['mqtt-print-progress-topic']
+                printer_state_change_topic = prefix+printer['mqtt-print-progress-topic']
                 power_command_topic = prefix + printer_mqtt_name + "/power/cmd"
                 rpi_command_topic = prefix + printer_mqtt_name + "/rpi/cmd"
 
                 client.subscribe([ ( connected_topic, 0),
-                                   ( print_progress_topic, 0), 
+                                   ( printer_state_change_topic, 0),
                                    ( power_command_topic, 0),
                                    ( rpi_command_topic, 0) ])
 
                 log.debug("Connected topic for printer {}: {}".format(printer_name, connected_topic))
-                log.debug("Print progress topic for printer {}: {}".format(printer_name, print_progress_topic))
+                log.debug("Print state change topic for printer {}: {}".format(printer_name, printer_state_change_topic))
                 log.debug("Power cmd topic for printer {}: {}".format(printer_name, power_command_topic))
                 log.debug("RPI cmd topic for printer {}: {}".format(printer_name, rpi_command_topic))
 
                 client.message_callback_add(connected_topic, 
                                             lambda client, userdata, msg : 
                                                 mqtt_on_connected(client, userdata, msg, printer))
-                client.message_callback_add(print_progress_topic, 
+                client.message_callback_add(printer_state_change_topic,
                                             lambda client, userdata, msg : 
-                                                mqtt_on_print_progress(client, userdata, msg, printer))
+                                                mqtt_on_printer_state_changed(client, userdata, msg, printer))
                 client.message_callback_add(power_command_topic,
                                             lambda client, userdata, msg :
                                                 mqtt_on_power_cmd(client, userdata, msg, printer))
@@ -163,7 +163,7 @@ class printer_state_change_response:
 def printer_change_state(state,printer):
         name = printer['name']
         log.info("change state of {} to {}".format(printer['name'],state))
-        if not state and not printer_idle_status[printer['name']]:
+        if not state and  printer_idle_status[printer['name']]:
                 return printer_state_change_response(False, "can not shutdown printer while it is printing")
 
         lines["{}_rpi".format(name)].set_value(not state)
@@ -199,12 +199,13 @@ def mqtt_on_connected(client, userdata, msg, printer):
         else:
                 lights_cmd(True)
 
-def mqtt_on_print_progress(client, userdata, msg, printer):
-        log.info("Received print progress message for printer {}: {}".format(printer['name'], msg.payload))
+def mqtt_on_printer_state_changed(client, userdata, msg, printer):
+        log.info("Received print state change message for printer {}: {}".format(printer['name'], msg.payload))
         printer_name = printer["name"]
         data = json.loads(msg.payload)
         flags = data["printer_data"]["state"]["flags"]
-        if not flags["operational"] or flags["finishing"]:
+        state = data['state_id']
+        if state is not "OPERATIONAL":
                 printer_idle_status[printer_name] = False
                 standby_timeout = config["standby-timeout"]
                 if printer_name in standby_timers:

@@ -15,7 +15,7 @@ printers:
     raspi-gpio: 14
     mqtt-name: cr10
     mqtt-connected-topic: cr10/mqtt
-    mqtt-print-progress-topic: cr10/progress/printing
+    mqtt-print-progress-topic: cr10/event/PrinterStateChanged
   - name: Wanhao Duplicator i3
     code-name: Maccaroni
     url: https://maccaroni.binary.kitchen
@@ -25,4 +25,4 @@ printers:
     raspi-gpio: 15
     mqtt-name: wanhao
     mqtt-connected-topic: wanhao/mqtt
-    mqtt-print-progress-topic: wanhao/progress/printing
+    mqtt-print-progress-topic: wanhao/event/PrinterStateChanged
