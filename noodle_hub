@@ -208,9 +208,7 @@ def mqtt_on_printer_state_changed(client, userdata, msg, printer):
         printer_name = printer["name"]
         data = json.loads(msg.payload)
         state = data['state_id']
-        flags = data['printer_data']['flags']
-        if (
-                state == "OPERATIONAL" or state == "ERROR") and printer_connection_status[printer_name]:
+        if (state == "OPERATIONAL" or state == "ERROR") or not printer_connection_status[printer_name]:
                 printer_idle_status[printer_name] = True
                 standby_timeout = config["standby-timeout"]
                 if printer_name in standby_timers:
