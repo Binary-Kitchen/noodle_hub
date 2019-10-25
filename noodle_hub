@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" 
+"""
 Noodle Hub
 Copyright (c) Thomas Schmid, 2019
 Author:
@@ -30,6 +30,8 @@ import json
 import gpiod
 from flask import Flask, render_template, request, redirect, abort
 
+SYSCONFDIR = '.'
+
 info = dict()
 info["author"] = 'Thomas Schmid'
 info["copyright"] = 'Copyright (c) Thomas Schmid, 2019'
@@ -57,8 +59,8 @@ client = mqtt.Client()
 
 prog = sys.argv[0]
 
-def read_config(): 
-    with open('config.yaml') as f:
+def read_config():
+    with open(SYSCONFDIR + 'config.yaml') as f:
         return yaml.load(f,yaml.FullLoader)
 
 def init_line(number):
@@ -138,11 +140,11 @@ def mqtt_worker():
                 log.debug("Power cmd topic for printer {}: {}".format(printer_name, power_command_topic))
                 log.debug("RPI cmd topic for printer {}: {}".format(printer_name, rpi_command_topic))
 
-                client.message_callback_add(connected_topic, 
-                                            lambda client, userdata, msg : 
+                client.message_callback_add(connected_topic,
+                                            lambda client, userdata, msg :
                                                 mqtt_on_connected(client, userdata, msg, printer))
                 client.message_callback_add(printer_state_change_topic,
-                                            lambda client, userdata, msg : 
+                                            lambda client, userdata, msg :
                                                 mqtt_on_printer_state_changed(client, userdata, msg, printer))
                 client.message_callback_add(power_command_topic,
                                             lambda client, userdata, msg :
@@ -180,7 +182,7 @@ def printer_change_state(state,printer):
         client.publish(prefix + mqtt_name + '/rpi/state', state)
 
         return printer_state_change_response(True)
-        
+
 def lights_cmd(state):
         lines["lights"].set_value(not state)
         prefix = config['mqtt-prefix']
@@ -193,7 +195,7 @@ def mqtt_on_connected(client, userdata, msg, printer):
         log.info("Received connection message for printer {}: {}".format(printer['name'], msg.payload))
         printer_connection_status[printer['name']] = msg.payload == b'connected'
         log.info(printer_connection_status)
-        
+
         # if all printers are offline, turn of lights
         if all(v == False for v in printer_connection_status.values()):
                 pass
@@ -206,7 +208,9 @@ def mqtt_on_printer_state_changed(client, userdata, msg, printer):
         printer_name = printer["name"]
         data = json.loads(msg.payload)
         state = data['state_id']
-        if state == "OPERATIONAL" or state == "ERROR" and printer_connection_status[printer_name]:
+        flags = data['printer_data']['flags']
+        if (
+                state == "OPERATIONAL" or state == "ERROR") and printer_connection_status[printer_name]:
                 printer_idle_status[printer_name] = True
                 standby_timeout = config["standby-timeout"]
                 if printer_name in standby_timers:

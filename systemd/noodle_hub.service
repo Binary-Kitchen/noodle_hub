@@ -1,0 +1,11 @@
+[Unit]
+Description=Binary Kitchen noodle hub
+After=network.target
+
+[Service]
+User=root
+Group=root
+ExecStart=noodle_hub
+
+[Install]
+WantedBy=multi-user.target]
