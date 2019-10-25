@@ -1,0 +1,62 @@
+---
+- name: Install some essential packages
+  pacman:
+    name: ['git','base-devel','sudo']
+    state: present
+
+- name: Create noodlehub user
+  user:
+    name: noodlehub
+    append: yes
+    groups: wheel
+    state: present
+
+- name: Enable NOPASSWD for wheel
+  lineinfile:
+    path: /etc/sudoers
+    create: yes
+    regexp: '^%wheel\s'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+
+- name: Clone pikaur
+  become: yes
+  become_user: doorlock
+  git:
+    repo: https://aur.archlinux.org/pikaur.git
+    dest: /tmp/pikaur
+
+- name: Install pikaur
+  command: makepkg -fsri --noconfirm
+  become_user: doorlock
+  become_method: su
+  become: yes
+  args:
+    chdir: /tmp/pikaur
+
+- name: Clone noodlehub repo
+  become_user: noodlehub
+  become: yes
+  git:
+    repo: https://github.com/Binary-Kitchen/noodle_hub
+    version: master
+    dest: /home/noodlehub/noodlehub
+
+- name: Enable doorlockd and doorstate
+  service:
+    enabled: yes
+    name: "{{ item }}"
+  with_items:
+  - doorlockd
+  - doorstate
+
+- name: Copy doorlockd configuration
+  template:
+    src: doorlockd.cfg
+    dest: /etc/doorlockd.cfg
+  notify: Restart doorlock services
+
+- name: Install nginx virtual host
+  copy:
+    src: doorlock_nginx_vhost
+    dest: /etc/nginx/sites-enabled/doorlock
+  notify: nginx restart
