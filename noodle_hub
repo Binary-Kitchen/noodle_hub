@@ -26,6 +26,7 @@ import yaml
 import paho.mqtt.client as mqtt
 import threading
 import json
+import os
 
 import gpiod
 from flask import Flask, render_template, request, redirect, abort
@@ -298,9 +299,13 @@ if __name__ == "__main__":
                 printer_connection_status[printer["name"]] = False
 
         client = mqtt.Client()
-        with open(SYSCONFDIR + "credentials.yaml") as f:
-            mqtt_auth = yaml.load(f,yaml.FullLoader)
-        client.username_pw_set(mqtt_auth["username"], mqtt_auth["password"])
+        credentials_path = SYSCONFDIR + "credentials.yaml"
+
+        if os.path.exists(credentials_path):
+            with open(SYSCONFDIR + "credentials.yaml") as f:
+                mqtt_auth = yaml.load(f,yaml.FullLoader)
+                client.username_pw_set(mqtt_auth["username"], mqtt_auth["password"])
+
         client.connect(config['mqtt-host'], config['mqtt-port'], 60)
 
         threading.Thread(target=mqtt_worker).start()
