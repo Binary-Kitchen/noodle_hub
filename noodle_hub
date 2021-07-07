@@ -32,6 +32,7 @@ import gpiod
 from flask import Flask, render_template, request, redirect, abort
 
 SYSCONFDIR = '.'
+TEMPLATEDIR = './templates'
 
 info = dict()
 info["author"] = 'Thomas Schmid'
@@ -39,7 +40,7 @@ info["copyright"] = 'Copyright (c) Thomas Schmid, 2019'
 info["license"] = 'GPLv3'
 info["email"] = 'tom@binary-kitchen.de'
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder = TEMPLATEDIR)
 config = dict()
 
 log_level = logging.DEBUG
