@@ -305,10 +305,10 @@ if __name__ == "__main__":
                 printer_connection_status[printer["name"]] = False
 
         client = mqtt.Client()
-        credentials_path = SYSCONFDIR + "credentials.yaml"
+        credentials_path = os.path.join(SYSCONFDIR, "credentials.yaml")
 
         if os.path.exists(credentials_path):
-            with open(SYSCONFDIR + "credentials.yaml") as f:
+            with open(credentials_path) as f:
                 mqtt_auth = yaml.load(f,yaml.FullLoader)
                 client.username_pw_set(mqtt_auth["username"], mqtt_auth["password"])
 
