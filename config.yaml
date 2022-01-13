@@ -1,28 +1,42 @@
 title: Noodle Hub
 lights-gpio: 23
 default-lights-state: false
+
 mqtt-host: pizza.binary.kitchen 
 mqtt-port: 1883
 mqtt-prefix: kitchen/cellar/3dprinter/
 standby-timeout: 1800
+
 printers:
-  - name: Creality CR-10
+  - name: Prusa MK3s
     code-name: Spaghetti
     url: https://spaghetti.binary.kitchen
     stream-url: https://spaghetti.binary.kitchen/webcam
-    default-power-state: false
-    power-gpio: 25
-    raspi-gpio: 14
-    mqtt-name: cr10
-    mqtt-connected-topic: cr10/mqtt
-    mqtt-print-progress-topic: cr10/event/PrinterStateChanged
-  - name: Wanhao Duplicator i3
+    power_ctrl:
+      default-power-state: false
+      power-gpio: 25
+      raspi-gpio: 14
+    mqtt:
+      mqtt-name: prusa_mk3s
+      mqtt-connected-topic: cr10/mqtt
+      mqtt-print-progress-topic: cr10/event/PrinterStateChanged
+  - name: "Voron 2.4"
+    code-name: Canneloni
+    url: https://canneloni.binary.kitchen
+    stream-url: https://canneloni.binary.kitchen/webcam
+    power_ctrl:
+      default-power-state: false
+      power-gpio: 25
+      raspi-gpio: 14
+  - name: "Prusa Mini"
     code-name: Maccaroni
     url: https://maccaroni.binary.kitchen
     stream-url: https://maccaroni.binary.kitchen/webcam
-    default-power-state: false
-    power-gpio: 8
-    raspi-gpio: 15
-    mqtt-name: wanhao
-    mqtt-connected-topic: wanhao/mqtt
-    mqtt-print-progress-topic: wanhao/event/PrinterStateChanged
+    power_ctrl:
+      default-power-state: false
+      power-gpio: 25
+      raspi-gpio: 14
+    mqtt:
+      mqtt-name: prusa_mini
+      mqtt-connected-topic: prusa_mini/mqtt
+      mqtt-print-progress-topic: prusa_mini/event/PrinterStateChanged
