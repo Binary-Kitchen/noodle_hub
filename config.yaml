@@ -13,9 +13,15 @@ printers:
     url: https://spaghetti.binary.kitchen
     stream-url: https://spaghetti.binary.kitchen/webcam
     power_ctrl:
-      default-power-state: false
-      power-gpio: 25
-      raspi-gpio: 14
+      pi:
+        gpio: 24
+        default_state: true
+        allow_ctrl: false
+      printer:
+        gpio: 16
+        default_state: false
+        allow_ctrl: true
+        print_guard: true
     mqtt:
       mqtt-name: prusa_mk3s
       mqtt-connected-topic: cr10/mqtt
@@ -25,17 +31,29 @@ printers:
     url: https://canneloni.binary.kitchen
     stream-url: https://canneloni.binary.kitchen/webcam
     power_ctrl:
-      default-power-state: false
-      power-gpio: 25
-      raspi-gpio: 14
+      pi:
+        gpio: 25
+        default_state: true
+        allow_ctrl: false
+      printer:
+        gpio: 15
+        default_state: false
+        allow_ctrl: true
+        print_guard: true
   - name: "Prusa Mini"
     code-name: Maccaroni
     url: https://maccaroni.binary.kitchen
     stream-url: https://maccaroni.binary.kitchen/webcam
     power_ctrl:
-      default-power-state: false
-      power-gpio: 25
-      raspi-gpio: 14
+      pi:
+        gpio: 22
+        default_state: true
+        allow_ctrl: false
+      printer:
+        gpio: 17
+        default_state: false
+        allow_ctrl: true
+        print_guard: true
     mqtt:
       mqtt-name: prusa_mini
       mqtt-connected-topic: prusa_mini/mqtt
