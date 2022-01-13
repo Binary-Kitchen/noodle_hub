@@ -63,7 +63,7 @@ client = mqtt.Client()
 prog = sys.argv[0]
 
 def read_config():
-    with open(SYSCONFDIR + 'config.yaml') as f:
+    with open(os.path.join(SYSCONFDIR, 'config.yaml')) as f:
         return yaml.load(f,yaml.FullLoader)
 
 def init_line(number):
