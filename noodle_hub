@@ -87,16 +87,20 @@ def init_gpios():
             lines["lights"].set_value(1)
 
         for printer in config['printers']:
+                if "power_ctrl" not in printer:
+                        continue
+
+                power_ctrl = printer["power_ctrl"]
                 printer_name = printer['name']
                 rpi_name = '{}_{}'.format(printer_name,'rpi')
                 pwr_name = '{}_{}'.format(printer_name,'pwr')
 
                 if lines.get(rpi_name) is None or is_line_initialized(lines[rpi_name]):
-                    lines[rpi_name] = init_line(printer["raspi-gpio"])
+                    lines[rpi_name] = init_line(power_ctrl["raspi-gpio"])
                 if lines.get(pwr_name) is None or is_line_initialized(lines[pwr_name]):
-                    lines[pwr_name] = init_line(printer["power-gpio"])
+                    lines[pwr_name] = init_line(power_ctrl["power-gpio"])
 
-                default_state = printer.get("default-power-state")
+                default_state = power_ctrl.get("default-power-state")
                 if default_state is not None:
                     lines[rpi_name].set_value(not default_state)
                     lines[pwr_name].set_value(not default_state)
@@ -297,7 +301,6 @@ if __name__ == "__main__":
                         format=log_fmt, datefmt=date_fmt)
 
         init_gpios()
-
 
         #init printer idle and connection status
         for printer in config["printers"]:
