@@ -28,8 +28,10 @@ import threading
 import json
 import os
 
-import gpiod
+from utils import load_system_module
 from flask import Flask, render_template, request, redirect, abort
+
+gpiod = load_system_module("gpiod")
 
 SYSCONFDIR = '.'
 
