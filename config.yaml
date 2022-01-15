@@ -4,7 +4,7 @@ default-lights-state: true
 
 mqtt-host: pizza.binary.kitchen 
 mqtt-port: 1883
-mqtt-prefix: kitchen/cellar/3dprinter/
+mqtt-prefix: MainC/Lab/3dPrinter/
 standby-timeout: 1800
 
 printers:
