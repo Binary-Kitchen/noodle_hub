@@ -1,6 +1,6 @@
 title: Noodle Hub
-lights-gpio: 23
-default-lights-state: false
+lights-gpio: 18
+default-lights-state: true
 
 mqtt-host: pizza.binary.kitchen 
 mqtt-port: 1883
@@ -10,51 +10,39 @@ standby-timeout: 1800
 printers:
   - name: Prusa MK3s
     code-name: Spaghetti
-    url: https://spaghetti.binary.kitchen
-    stream-url: https://spaghetti.binary.kitchen/webcam
+    url: http://spaghetti.binary.kitchen
+    stream-url: http://spaghetti.binary.kitchen/webcam/stream
     power_ctrl:
       pi:
-        gpio: 24
+        gpio: 23
         default_state: true
         allow_ctrl: false
       printer:
-        gpio: 16
-        default_state: false
+        gpio: 9
+        default_state: true
         allow_ctrl: true
         print_guard: true
-    mqtt:
-      mqtt-name: prusa_mk3s
-      mqtt-connected-topic: cr10/mqtt
-      mqtt-print-progress-topic: cr10/event/PrinterStateChanged
   - name: "Voron 2.4"
     code-name: Canneloni
-    url: https://canneloni.binary.kitchen
-    stream-url: https://canneloni.binary.kitchen/webcam
+    url: http://canneloni.binary.kitchen
+    stream-url: http://canneloni.binary.kitchen/webcam/stream
+    power_ctrl:
+      printer:
+        gpio: 7
+        default_state: true
+        allow_ctrl: true
+        print_guard: true
+  - name: "Prusa Mini"
+    code-name: Maccaroni
+    url: http://maccaroni.binary.kitchen
+    stream-url: http://maccaroni.binary.kitchen/webcam/stream
     power_ctrl:
       pi:
         gpio: 25
         default_state: true
         allow_ctrl: false
       printer:
-        gpio: 15
-        default_state: false
-        allow_ctrl: true
-        print_guard: true
-  - name: "Prusa Mini"
-    code-name: Maccaroni
-    url: https://maccaroni.binary.kitchen
-    stream-url: https://maccaroni.binary.kitchen/webcam
-    power_ctrl:
-      pi:
-        gpio: 22
+        gpio: 8
         default_state: true
-        allow_ctrl: false
-      printer:
-        gpio: 17
-        default_state: false
         allow_ctrl: true
         print_guard: true
-    mqtt:
-      mqtt-name: prusa_mini
-      mqtt-connected-topic: prusa_mini/mqtt
-      mqtt-print-progress-topic: prusa_mini/event/PrinterStateChanged

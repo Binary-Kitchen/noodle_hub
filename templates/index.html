@@ -46,13 +46,9 @@
                       <div class="col-md-6 ">
                         <div class="card mb-6 box-shadow">
                           <!-- <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap"> -->
-                          {% if online_status[p["name"]] %}
                           <a href="{{p["stream-url"]}}">
                             <img class="card-img-top" src="{{ p["stream-url"] }}" />
                           </a>
-                          {% else %}
-                            <img class="card-img-top" src="/static/test.png" />
-                          {% endif %}
                           
                           <div class="card-body">
                             <h5 class="card-title">{{ p["name"] }}</h5>
